@@ -15,10 +15,8 @@ except ImportError:
 
 print("Importing flask... ", end="")
 try:
-    #import flask, render_template, g, request, redirect
     import flask
     from flask import render_template, g, request, redirect
-    print("OK")
 except ImportError:
     print("FAILED")
     print("Could not import flask, is it installed?")
