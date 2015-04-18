@@ -15,7 +15,9 @@ except ImportError:
 
 print("Importing flask... ", end="")
 try:
-    import Flask, render_template, g, request, redirect
+    #import flask, render_template, g, request, redirect
+    import flask
+    from flask import render_template, g, request, redirect
     print("OK")
 except ImportError:
     print("FAILED")
@@ -32,7 +34,7 @@ app = flask.Flask(__name__)
 
 @app.route("/")
 def index():
-    return render_template("views/index.html")
+    return render_template("index.html")
 
 @app.route("/session/")
 def session():
