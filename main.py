@@ -44,7 +44,7 @@ def parse(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action='store_true')
     parser.add_argument("--host", default='0.0.0.0')
-    parser.add_argument("--port", default=5000)
+    parser.add_argument("--port", default=5000, type=int)
     return parser.parse_args(args)
 
 if __name__ == "__main__":
