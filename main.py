@@ -43,9 +43,11 @@ def session():
 def parse(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action='store_true')
+    parser.add_argument("--host", default='0.0.0.0')
+    parser.add_argument("--port", default=5000)
     return parser.parse_args(args)
 
 if __name__ == "__main__":
     args = parse(sys.argv[1:])
     app.debug = args.debug
-    app.run()
+    app.run(args.host, args.port)
