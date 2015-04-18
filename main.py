@@ -3,7 +3,7 @@
 from __future__ import print_function
 import sys
 
-print("Imporint blpapi... ", end="")
+print("Importing blpapi... ", end="")
 try:
     import blpapi
     print("OK")
