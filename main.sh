@@ -6,4 +6,4 @@ then
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 fi
 
-./main.py
+./main.py $@
