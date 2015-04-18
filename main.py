@@ -50,4 +50,4 @@ def parse(args):
 if __name__ == "__main__":
     args = parse(sys.argv[1:])
     app.debug = args.debug
-    app.run(args.host, args.port)
+    app.run(host=args.host, port=args.port)
