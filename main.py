@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
 
-# first commit change 
 from __future__ import print_function
 import sys
 import argparse
@@ -16,7 +15,7 @@ except ImportError:
 
 print("Importing flask... ", end="")
 try:
-    import flask
+    import Flask, render_template, g, request, redirect
     print("OK")
 except ImportError:
     print("FAILED")
@@ -32,8 +31,8 @@ def get_bloomberg_session(server_host = 'localhost', server_port = 8194):
 app = flask.Flask(__name__)
 
 @app.route("/")
-def hello():
-    return "Hello, world."
+def index():
+    return render_template("views/index.html")
 
 @app.route("/session/")
 def session():
