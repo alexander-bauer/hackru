@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+</head>
+<body>
+
+  <form action="" method="post">
+    <dl>
+      <dt>Username:
+      <dd><input type="text" name="username" size="30" value="{{ request.form.username }}">
+      <dt>Password:
+      <dd><input type="password" name="password" size="30">
+    </dl>
+    <div class="actions"><input type="submit" value="Sign In"></div>
+  </form>
+
+</body>
+</html>

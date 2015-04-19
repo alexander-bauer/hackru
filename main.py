@@ -17,9 +17,19 @@ print("Importing flask... ", end="")
 try:
     import flask
     from flask import render_template, g, request, redirect
+    print("OK")
 except ImportError:
     print("FAILED")
     print("Could not import flask, is it installed?")
+    sys.exit(1)
+
+print("Importing flask-login... ", end="")
+try:
+    import flask.ext.login
+    print("OK")
+except ImportError:
+    print("FAILED")
+    print("Could not import flask-login, is it installed?")
     sys.exit(1)
 
 def get_bloomberg_session(server_host = 'localhost', server_port = 8194):
@@ -55,6 +65,9 @@ def handleResponseEvent(event):
 
 
 app = flask.Flask(__name__)
+app.secret_key = "deadly hackathons"
+login_manager = flask.ext.login.LoginManager()
+login_manager.init_app(app)
 
 @app.route("/")
 def index():
@@ -65,6 +78,31 @@ def session():
     sess = get_bloomberg_session()
     sess.start()
     return "Hello, world."
+
+@app.route('/register', methods = ['POST'])
+def register():
+    form = flask.LoginForm()
+    if form.validate_on_submit():
+        # login and validate the user...
+        login_user(user)
+        flash("Logged in successfully.")
+        return redirect(request.args.get("next") or url_for("index"))
+    return render_template("login.html", form=form)
+
+@app.route('/login', methods = ['POST'])
+def login():
+    form = flask.LoginForm()
+    if form.validate_on_submit():
+        # login and validate the user...
+        login_user(user)
+        flash("Logged in successfully.")
+        return redirect(request.args.get("next") or url_for("index"))
+    return render_template("login.html", form=form)
+
+
+@login_manager.user_loader
+def load_user(userid):
+    return User.get(userid)
 
 def parse(args):
     parser = argparse.ArgumentParser()

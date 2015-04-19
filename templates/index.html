@@ -88,16 +88,50 @@
     <section id="demo">
         <div class="container">
             <div class="row">
-                <div class="col-lg-12 text-center">
+                <div class="col-md-12 text-center">
                     <h2>Demo</h2>
                     <hr class="star-primary">
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-3">
+                            <h3>Register</h3>
+                            <form action="/login" method="post">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="username" placeholder="username">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" class="form-control" name="password" placeholder="password">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" class="form-control" name="password-again" placeholder="password again">
+                                </div>
+                               <button type="submit" class="btn btn-default">Register</button>
+                            </form>
+                        </div>
+
+                        <div class="col-md-3" >
+                            <h3>Login</h3>
+                            <form action="/login" method="post">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="username" placeholder="username">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" class="form-control" name="password" placeholder="password">
+                                </div>
+                               <button type="submit" class="btn btn-default">Login</button>
+                            </form>
+                        </div>
+                         <div class="col-md-3">
+                        </div>
                 </div>
             </div>
            
         </div>
     </section>
 
-    
+<body>
+
     <!-- Contact Section -->
     <section id="contact">
         <div class="container">
@@ -149,5 +183,4 @@
     <script src="{{ url_for('static', filename='js/freelancer.js') }}"></script>
 
 </body>
-
 </html>
