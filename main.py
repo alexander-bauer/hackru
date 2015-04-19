@@ -118,8 +118,10 @@ def insertStock():
     try:
         username = session['user']
         ticker = request.form['ticker']
+        if(not "us equity" in ticker.lower()):
+            ticker = ticker + " US Equity"
         if(ticker != ""):
-            newStock =  Stock(username=username, ticker=ticker).save()
+            newStock =  Stock(username=username, ticker=ticker.upper()).save()
         else:
             flash("you must have a value for ticker")
         return redirect('/addStocks')
