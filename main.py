@@ -28,6 +28,32 @@ def get_bloomberg_session(server_host = 'localhost', server_port = 8194):
     options.setServerPort(server_port)
     return blpapi.Session(options)
 
+def start_request_service(session):
+    requestID = CorrelationID(1)
+    refDataSvc = session.getService("//blp/refdata")
+    request = refDataSvc.createRequest("RefrenceDataRequest")
+    request.append("securities","IMB US Equity")
+    request.append("fields","PX_LAST")
+    session.sendRequest(request,requestID)
+    while (True):
+        event = session.nextEvent()
+        if (event.eventType().intValue()==Event.EventType.Constants.RESPONCE):
+            False
+        elif(event.eventType().intValue()== Event.EventType.Constants.PARTIAL_RESPONCE):
+            handleResponseEvent(event)
+        else:
+            handleOtherEvent(event)
+
+def handleResponseEvent(event):
+    print("EventType=" + event.eventType())
+    iterate = event.messageIterator()
+    while(iterate.hasNext()):
+        message = iterate.next()
+        print("correlationID = " + message.correlationID())
+        print("messageType = " + message.messageType())
+        print(srt(message))
+
+
 app = flask.Flask(__name__)
 
 @app.route("/")
