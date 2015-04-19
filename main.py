@@ -39,12 +39,11 @@ def get_bloomberg_session(server_host = 'localhost', server_port = 8194):
     return blpapi.Session(options)
 
 def start_request_service(session):
-    requestID = CorrelationID(1)
     refDataSvc = session.getService("//blp/refdata")
     request = refDataSvc.createRequest("RefrenceDataRequest")
     request.append("securities","IMB US Equity")
     request.append("fields","PX_LAST")
-    session.sendRequest(request,requestID)
+    session.sendRequest(request)
     flag = True
     while (flag):
         event = session.nextEvent()
@@ -76,7 +75,7 @@ def index():
 
 @app.route("/session/")
 def session():
-    sess = get_bloomberg_session()
+    sess = get_bloomberg_session(args.remote, args.remoteport)
     sess.start()
     start_request_service(sess)
     return "Hello, world."
@@ -109,6 +108,8 @@ def load_user(userid):
 def parse(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action='store_true')
+    parser.add_argument("--remote", default='localhost')
+    parser.add_argument("--remoteport", default=8194)
     parser.add_argument("--host", default='0.0.0.0')
     parser.add_argument("--port", default=80, type=int)
     return parser.parse_args(args)
