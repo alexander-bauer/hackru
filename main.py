@@ -118,6 +118,10 @@ def register():
     password = request.form['password']
     passwordAg = request.form['password-again']
 
+    # Check if there are any users of the same name in the database already.
+    if(User.objects(username = username).count() > 0):
+        return "user with that name already exists"
+
     if(password == passwordAg):
         newUser = User(phone=phone, username=username, password=password).save()
         session['user'] = username
