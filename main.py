@@ -45,11 +45,12 @@ def start_request_service(session):
     request.append("securities","IMB US Equity")
     request.append("fields","PX_LAST")
     session.sendRequest(request,requestID)
-    while (True):
+    flag = True
+    while (flag):
         event = session.nextEvent()
-        if (event.eventType().intValue()==Event.EventType.Constants.RESPONCE):
-            False
-        elif(event.eventType().intValue()== Event.EventType.Constants.PARTIAL_RESPONCE):
+        if (event.eventType().intValue()==Event.EventType.Constants.RESPONSE):
+            flag = False
+        elif(event.eventType().intValue()== Event.EventType.Constants.PARTIAL_RESPONSE):
             handleResponseEvent(event)
         else:
             handleOtherEvent(event)
@@ -61,7 +62,7 @@ def handleResponseEvent(event):
         message = iterate.next()
         print("correlationID = " + message.correlationID())
         print("messageType = " + message.messageType())
-        print(srt(message))
+        print(str(message))
 
 
 app = flask.Flask(__name__)
@@ -77,6 +78,7 @@ def index():
 def session():
     sess = get_bloomberg_session()
     sess.start()
+    start_request_service(sess)
     return "Hello, world."
 
 @app.route('/register', methods = ['POST'])
