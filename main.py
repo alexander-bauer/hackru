@@ -1,19 +1,29 @@
 #!/usr/bin/env python2
-# yea
+
 from __future__ import print_function
+from mongoengine import *
 import sys
 import argparse
 import json
 import ssl
 import urllib2
 
-data = {
-    "securities": ["IBM US Equity", "AAPL US Equity", "MMM US Equity"],
-    "fields": ["PX_LAST", "OPEN", "EPS_ANNUALIZED"],
-    "startDate": "20150416",
-    "endDate": "20150418",
-    "periodicitySelection": "DAILY"
-}
+connect('users')
+
+class User(Document):
+    phone = StringField(required=True)
+    username = StringField(max_length=50)
+    password = StringField(max_length=50)
+
+def getData(securities, startDate, endDate):
+    data = {
+        "securities": securities,
+        "fields": ["PX_LAST", "OPEN", "EPS_ANNUALIZED"],
+        "startDate": startDate,
+        "endDate": endDate,
+        "periodicitySelection": "DAILY"
+    }
+    return data
 
 print("Importing blpapi... ", end="")
 try:
@@ -27,7 +37,7 @@ except ImportError:
 print("Importing flask... ", end="")
 try:
     import flask
-    from flask import render_template, g, request, redirect
+    from flask import render_template, g, request, redirect, session
     print("OK")
 except ImportError:
     print("FAILED")
@@ -43,7 +53,7 @@ except ImportError:
     print("Could not import flask-login, is it installed?")
     sys.exit(1)
 
-def request():
+def makeRequest():
     req = urllib2.Request('https://http-api.openbloomberg.com/request?ns=blp&service=refdata&type=HistoricalDataRequest')
     req.add_header('Content-Type', 'application/json')
 
@@ -64,10 +74,10 @@ login_manager = flask.ext.login.LoginManager()
 login_manager.init_app(app)
 
 @app.route('/session')
-def session():
+def someSession():
 
     try:
-        obj = json.loads(request().read())
+        obj = json.loads(makeRequest().read())
         return render_template("viewData.html", posts = obj)
     except Exception as e:
         print(e)
@@ -77,32 +87,43 @@ def index():
     return render_template("index.html")
 
 
-# @app.route("/session/")
-# def session():
-   
-    
-#     return 
+@app.route('/login', methods = ['POST'])
+def login():
+    username = request.form['username']
+    password = request.form['password']
+
+    try:
+        if(User.objects(username = username, password = password)):
+            session['user'] = username
+            return redirect('/loggedIn')
+    except:
+        return "failure"
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect('/')
 
 @app.route('/register', methods = ['POST'])
 def register():
-    form = flask.LoginForm()
-    if form.validate_on_submit():
-        # login and validate the user...
-        login_user(user)
-        flash("Logged in successfully.")
-        return redirect(request.args.get("next") or url_for("index"))
-    return render_template("login.html", form=form)
 
-@app.route('/login', methods = ['POST'])
-def login():
-    form = flask.LoginForm()
-    if form.validate_on_submit():
-        # login and validate the user...
-        login_user(user)
-        flash("Logged in successfully.")
-        return redirect(request.args.get("next") or url_for("index"))
-    return render_template("login.html", form=form)
+    phone = request.form['phone']
+    username = request.form['username']
+    password = request.form['password']
+    passwordAg = request.form['password-again']
 
+    if(password == passwordAg):
+        newUser = User(phone=phone, username=username, password=password).save()
+        session['user'] = username
+        return redirect('/loggedIn')
+    return "failure"
+
+@app.route('/loggedIn')
+def loggedIn():
+    try:
+        return render_template("loggedIn.html", user = session['user'])
+    except KeyError:
+        return redirect('/')
 
 @login_manager.user_loader
 def load_user(userid):
