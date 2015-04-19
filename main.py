@@ -8,10 +8,10 @@ import ssl
 import urllib2
 
 data = {
-    "securities": ["IBM US Equity", "AAPL US Equity"],
+    "securities": ["IBM US Equity", "AAPL US Equity", "MMM US Equity"],
     "fields": ["PX_LAST", "OPEN", "EPS_ANNUALIZED"],
-    "startDate": "20120101",
-    "endDate": "20120301",
+    "startDate": "20150416",
+    "endDate": "20150418",
     "periodicitySelection": "DAILY"
 }
 
@@ -58,7 +58,6 @@ def request():
     except Exception as e:
         raise(e)
 
-
 app = flask.Flask(__name__)
 app.secret_key = "deadly hackathons"
 login_manager = flask.ext.login.LoginManager()
@@ -66,7 +65,12 @@ login_manager.init_app(app)
 
 @app.route('/session')
 def session():
-    return request().read()
+
+    try:
+        obj = json.loads(request().read())
+        return render_template("viewData.html", posts = obj)
+    except Exception as e:
+        print(e)
     
 @app.route("/")
 def index():
