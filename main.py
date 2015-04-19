@@ -9,8 +9,11 @@ import json
 import ssl
 import urllib2
 import datetime
+import authy.api
 
 connect('users')
+
+authy_api = authy.api.AuthyApiClient("IZxs35zzMcDdd789FYnLbIXF9Eq8Tcxe")
 
 class User(Document):
     phone = StringField(required=True)
@@ -98,9 +101,15 @@ def login():
     password = request.form['password']
 
     try:
-        if(User.objects(username = username, password = password)):
+        count_matched = User.objects(username = username, password =
+                password).count()
+        if(count_matched == 0):
+            return "No user with that name"
+        if(count_matched == 1):
             session['user'] = username
             return redirect('/loggedIn')
+        else:
+            return "more than one user with that name"
     except:
         return "failure"
 
@@ -129,10 +138,16 @@ def register():
     password = request.form['password']
     passwordAg = request.form['password-again']
 
+    # Check if there are any users of the same name in the database already.
+    if(User.objects(username = username).count() > 0):
+        return "user with that name already exists"
+
     if(password == passwordAg):
-        newUser = User(phone=phone, username=username, password=password).save()
-        session['user'] = username
-        return redirect('/loggedIn')
+        authy_user = authy_api.users.create(username, phone, '+1')
+	if authy_user.ok():
+            newUser = User(phone=phone, username=username, password=password).save()
+            session['user'] = username
+            return redirect('/loggedIn')
     return "failure"
 
 @app.route('/loggedIn')
@@ -207,8 +222,6 @@ def load_user(userid):
 def parse(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action='store_true')
-    parser.add_argument("--remote", default='localhost')
-    parser.add_argument("--remoteport", default=8194)
     parser.add_argument("--host", default='0.0.0.0')
     parser.add_argument("--port", default=80, type=int)
     return parser.parse_args(args)
