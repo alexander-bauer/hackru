@@ -2,11 +2,13 @@
 
 from __future__ import print_function
 from mongoengine import *
+from datetime import timedelta
 import sys
 import argparse
 import json
 import ssl
 import urllib2
+import datetime
 
 connect('users')
 
@@ -14,6 +16,9 @@ class User(Document):
     phone = StringField(required=True)
     username = StringField(max_length=50)
     password = StringField(max_length=50)
+class Stock(Document):
+    username = StringField(max_length=50)
+    ticker = StringField(max_length=50)
 
 def getData(securities, startDate, endDate):
     data = {
@@ -37,7 +42,7 @@ except ImportError:
 print("Importing flask... ", end="")
 try:
     import flask
-    from flask import render_template, g, request, redirect, session
+    from flask import render_template, g, request, redirect, session, flash
     print("OK")
 except ImportError:
     print("FAILED")
@@ -53,7 +58,7 @@ except ImportError:
     print("Could not import flask-login, is it installed?")
     sys.exit(1)
 
-def makeRequest():
+def makeRequest(securities, startDate, endDate):
     req = urllib2.Request('https://http-api.openbloomberg.com/request?ns=blp&service=refdata&type=HistoricalDataRequest')
     req.add_header('Content-Type', 'application/json')
 
@@ -62,7 +67,7 @@ def makeRequest():
     ctx.load_cert_chain('keys/client.crt', 'keys/client.key')
 
     try: 
-        res = urllib2.urlopen(req, data=json.dumps(data), context=ctx)
+        res = urllib2.urlopen(req, data=json.dumps(getData(securities, startDate, endDate)), context=ctx)
         #print(res.read())
         return res
     except Exception as e:
@@ -99,6 +104,18 @@ def login():
     except:
         return "failure"
 
+@app.route('/insertStock', methods = ['POST'])
+def insertStock():
+    try:
+        username = session['user']
+        ticker = request.form['ticker']
+        if(ticker != ""):
+            newStock =  Stock(username=username, ticker=ticker).save()
+        else:
+            flash("you must have a value for ticker")
+        return redirect('/addStocks')
+    except:
+        return "failure"
 @app.route("/logout")
 def logout():
     session.clear()
@@ -128,7 +145,8 @@ def loggedIn():
 @app.route('/showStocks')
 def showStocks():
     try:
-        return render_template("showStocks.html", user = session['user'])
+        myStocks = Stock.objects(username=session['user'])
+        return render_template("showStocks.html", user = session['user'], stocks = myStocks)
     except KeyError:
         return redirect('/')
 
@@ -142,9 +160,44 @@ def addStocks():
 @app.route('/getStockData')
 def getStockData():
     try:
-        return render_template("getStockData.html", user = session['user'])
+        myStocks = Stock.objects(username=session['user'])
+        return render_template("getStockData.html", user = session['user'], stocks = myStocks)
     except KeyError:
         return redirect('/')
+
+@app.route('/viewData', methods = ['POST'])
+def viewData():
+    try:
+        myStocks = Stock.objects(username=session['user'])
+        stock = [request.form["myStocks"]]
+        now = datetime.datetime.now()
+
+        month = str(now.month)
+        if(len(str(month)) < 2):
+            month = "0" + month
+
+        day = str(now.day)
+        if(len(str(day)) < 2):
+            day = "0" + day
+
+        current = str(now.year) + month + day
+
+        past = now - timedelta(days = 3)
+
+        pmonth = str(past.month)
+        if(len(str(pmonth)) < 2):
+            pmonth = "0" + pmonth
+
+        pday = str(past.day)
+        if(len(str(pday)) < 2):
+            pday = "0" + pday
+
+        pastDate = str(past.year) + pmonth + pday
+
+        value = makeRequest(stock, pastDate, current).read()
+        return render_template("getStockData.html", user = session['user'], dataView = json.loads(value), stocks = myStocks)
+    except:
+        return "failure"
 
 
 @login_manager.user_loader

@@ -60,8 +60,44 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1>Get stock data for: {{ user }}</h1>
-                        
+                        <h1>Get Stock Data</h1>
+                        <div class="row">
+                            <div class="col-md-5">
+                            <form action="/viewData" method="post">
+                                <div class="form-group">
+                                    <select name="myStocks" id="" class="form-control">
+                                        {% for stock in stocks %}
+                                            {% if stock.ticker != "" %}
+                                                <option>{{ stock.ticker }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <input type="submit" value="Get Data" class="btn btn-default">
+                            </form>
+                            </div>
+                        </div>
+                        <br>
+                        {% if dataView is defined %}
+                            <div class="row">
+                            <div class="col-md-6">
+                            <table class="table table-striped">
+                                <th>Date</th>
+                                <th>Open</th>
+                                <th>Close</th>
+                                <th>Change</th>
+                            {% for obj in dataView.data[0].securityData.fieldData  %}
+                                <tr>
+                                    <td>{{ obj.date[:10] }}</td>
+                                    <td>{{ obj.OPEN }}</td>
+                                    <td>{{ obj.PX_LAST }}</td>
+                                    <td>{{ obj.PX_LAST - obj.OPEN }}</td>
+                                </tr>
+                            {% endfor %}
+                            </table>
+                            </div>
+                            </div>
+                        {% endif %}
                         <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
                     </div>
                 </div>

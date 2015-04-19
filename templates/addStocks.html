@@ -60,8 +60,25 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1>Add stocks for: {{ user }}</h1>
-                        
+                        <h1>Add Stock to Portfolio</h1>
+                        {% with msg = get_flashed_messages() %}
+                        {% if msg is defined %}
+                            {% for m in msg %}
+                                <h3>{{ m }}</h3>
+                            {% endfor %}
+                        {% endif %}
+                        {% endwith %}
+                        <div class="row">
+                            <div class="col-md-5">
+                                <form action="/insertStock" method="post">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="ticker" placeholder="Type ticker symbol here...">
+                                    </div>
+                                    <input type="submit" value="Add Stock" class="btn btn-default">
+                                </form>
+                            </div>
+                        </div>
+                        <br>
                         <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
                     </div>
                 </div>
