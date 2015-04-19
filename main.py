@@ -3,6 +3,17 @@
 from __future__ import print_function
 import sys
 import argparse
+import json
+import ssl
+import urllib2
+
+data = {
+    "securities": ["IBM US Equity", "AAPL US Equity"],
+    "fields": ["PX_LAST", "OPEN", "EPS_ANNUALIZED"],
+    "startDate": "20120101",
+    "endDate": "20120301",
+    "periodicitySelection": "DAILY"
+}
 
 print("Importing blpapi... ", end="")
 try:
@@ -32,36 +43,20 @@ except ImportError:
     print("Could not import flask-login, is it installed?")
     sys.exit(1)
 
-def get_bloomberg_session(server_host = 'localhost', server_port = 8194):
-    options = blpapi.SessionOptions()
-    options.setServerHost(server_host)
-    options.setServerPort(server_port)
-    return blpapi.Session(options)
+def request():
+    req = urllib2.Request('https://http-api.openbloomberg.com/request?ns=blp&service=refdata&type=HistoricalDataRequest')
+    req.add_header('Content-Type', 'application/json')
 
-def start_request_service(session):
-    refDataSvc = session.getService("//blp/refdata")
-    request = refDataSvc.createRequest("RefrenceDataRequest")
-    request.append("securities","IMB US Equity")
-    request.append("fields","PX_LAST")
-    session.sendRequest(request)
-    flag = True
-    while (flag):
-        event = session.nextEvent()
-        if (event.eventType().intValue()==Event.EventType.Constants.RESPONSE):
-            flag = False
-        elif(event.eventType().intValue()== Event.EventType.Constants.PARTIAL_RESPONSE):
-            handleResponseEvent(event)
-        else:
-            handleOtherEvent(event)
+    ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+    ctx.load_verify_locations('keys/bloomberg.crt')
+    ctx.load_cert_chain('keys/client.crt', 'keys/client.key')
 
-def handleResponseEvent(event):
-    print("EventType=" + event.eventType())
-    iterate = event.messageIterator()
-    while(iterate.hasNext()):
-        message = iterate.next()
-        print("correlationID = " + message.correlationID())
-        print("messageType = " + message.messageType())
-        print(str(message))
+    try: 
+        res = urllib2.urlopen(req, data=json.dumps(data), context=ctx)
+        #print(res.read())
+        return res
+    except Exception as e:
+        raise(e)
 
 
 app = flask.Flask(__name__)
@@ -69,6 +64,10 @@ app.secret_key = "deadly hackathons"
 login_manager = flask.ext.login.LoginManager()
 login_manager.init_app(app)
 
+@app.route('/session')
+def session():
+    return request().read()
+    
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -79,6 +78,12 @@ def session():
     sess.start()
     start_request_service(sess)
     return "Hello, world."
+
+# @app.route("/session/")
+# def session():
+   
+    
+#     return 
 
 @app.route('/register', methods = ['POST'])
 def register():
@@ -116,5 +121,6 @@ def parse(args):
 
 if __name__ == "__main__":
     args = parse(sys.argv[1:])
+    #request()
     app.debug = args.debug
     app.run(host=args.host, port=args.port)
