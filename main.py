@@ -93,9 +93,13 @@ def login():
     password = request.form['password']
 
     try:
-        if(User.objects(username = username, password = password)):
+        count_matched = User.objects(username = username, password =
+                password).count()
+        if(count_matched == 1):
             session['user'] = username
             return redirect('/loggedIn')
+        else:
+            return "more than one user with that name"
     except:
         return "failure"
 
