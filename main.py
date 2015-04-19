@@ -125,6 +125,28 @@ def loggedIn():
     except KeyError:
         return redirect('/')
 
+@app.route('/showStocks')
+def showStocks():
+    try:
+        return render_template("showStocks.html", user = session['user'])
+    except KeyError:
+        return redirect('/')
+
+@app.route('/addStocks')
+def addStocks():
+    try:
+        return render_template("addStocks.html", user = session['user'])
+    except KeyError:
+        return redirect('/')
+
+@app.route('/getStockData')
+def getStockData():
+    try:
+        return render_template("getStockData.html", user = session['user'])
+    except KeyError:
+        return redirect('/')
+
+
 @login_manager.user_loader
 def load_user(userid):
     return User.get(userid)
