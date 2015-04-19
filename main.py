@@ -95,6 +95,8 @@ def login():
     try:
         count_matched = User.objects(username = username, password =
                 password).count()
+        if(count_matched == 0):
+            return "No user with that name"
         if(count_matched == 1):
             session['user'] = username
             return redirect('/loggedIn')
