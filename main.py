@@ -158,8 +158,6 @@ def load_user(userid):
 def parse(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action='store_true')
-    parser.add_argument("--remote", default='localhost')
-    parser.add_argument("--remoteport", default=8194)
     parser.add_argument("--host", default='0.0.0.0')
     parser.add_argument("--port", default=80, type=int)
     return parser.parse_args(args)
