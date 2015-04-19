@@ -7,8 +7,11 @@ import argparse
 import json
 import ssl
 import urllib2
+import authy.api
 
 connect('users')
+
+authy_api = authy.api.AuthyApiClient("IZxs35zzMcDdd789FYnLbIXF9Eq8Tcxe")
 
 class User(Document):
     phone = StringField(required=True)
@@ -123,9 +126,11 @@ def register():
         return "user with that name already exists"
 
     if(password == passwordAg):
-        newUser = User(phone=phone, username=username, password=password).save()
-        session['user'] = username
-        return redirect('/loggedIn')
+        authy_user = authy_api.users.create(username, phone, '+1')
+	if authy_user.ok():
+            newUser = User(phone=phone, username=username, password=password).save()
+            session['user'] = username
+            return redirect('/loggedIn')
     return "failure"
 
 @app.route('/loggedIn')
