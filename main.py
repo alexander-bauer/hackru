@@ -72,12 +72,6 @@ def session():
 def index():
     return render_template("index.html")
 
-@app.route("/session/")
-def session():
-    sess = get_bloomberg_session(args.remote, args.remoteport)
-    sess.start()
-    start_request_service(sess)
-    return "Hello, world."
 
 # @app.route("/session/")
 # def session():
