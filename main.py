@@ -184,38 +184,34 @@ def getStockData():
 
 @app.route('/viewData', methods = ['POST'])
 def viewData():
-    try:
-        myStocks = Stock.objects(username=session['user'])
-        stock = [request.form["myStocks"]]
-        now = datetime.datetime.now()
+    myStocks = Stock.objects(username=session['user'])
+    stock = [request.form["myStocks"]]
+    now = datetime.datetime.now()
 
-        month = str(now.month)
-        if(len(str(month)) < 2):
-            month = "0" + month
+    month = str(now.month)
+    if(len(str(month)) < 2):
+        month = "0" + month
 
-        day = str(now.day)
-        if(len(str(day)) < 2):
-            day = "0" + day
+    day = str(now.day)
+    if(len(str(day)) < 2):
+        day = "0" + day
 
-        current = str(now.year) + month + day
+    current = str(now.year) + month + day
 
-        past = now - timedelta(days = 3)
+    past = now - timedelta(days = 3)
 
-        pmonth = str(past.month)
-        if(len(str(pmonth)) < 2):
-            pmonth = "0" + pmonth
+    pmonth = str(past.month)
+    if(len(str(pmonth)) < 2):
+        pmonth = "0" + pmonth
 
-        pday = str(past.day)
-        if(len(str(pday)) < 2):
-            pday = "0" + pday
+    pday = str(past.day)
+    if(len(str(pday)) < 2):
+        pday = "0" + pday
 
-        pastDate = str(past.year) + pmonth + pday
+    pastDate = str(past.year) + pmonth + pday
 
-        value = makeRequest(stock, pastDate, current).read()
-        return render_template("getStockData.html", user = session['user'], dataView = json.loads(value), stocks = myStocks)
-    except:
-        return "failure"
-
+    value = makeRequest(stock, pastDate, current).read()
+    return render_template("getStockData.html", user = session['user'], dataView = json.loads(value), stocks = myStocks)
 
 @login_manager.user_loader
 def load_user(userid):
